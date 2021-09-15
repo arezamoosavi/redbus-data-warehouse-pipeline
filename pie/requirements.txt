@@ -3,6 +3,7 @@
 faust-streaming==0.6.4
 faust-streaming[uvloop,prometheus]==0.6.4
 prometheus-client==0.11.0
+kafka-python==2.0.2
 
 # DB
 # ------------------------------------------------------------------------------

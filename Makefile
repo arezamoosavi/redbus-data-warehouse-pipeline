@@ -4,11 +4,11 @@ timescale:
 kafka:
 	docker-compose up -d zookeeper kafka
 
-check-topic:
-	kafkacat -b localhost:29092 -t queueing.transactions -C -O -o-1 | jq .
-
-run-producer:
+producer:
 	docker-compose up producer
+
+pie_consumer:
+	docker-compose up pie_consumer
 
 down:
 	docker-compose down -v

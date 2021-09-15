@@ -13,7 +13,7 @@ TOPIC_DISABLE_LEADER = strtobool(os.getenv("TOPIC_DISABLE_LEADER", "False"))
 
 SSL_ENABLED = False
 SSL_CONTEXT = None
-OFFSET_ACK_ON_KAFKA = strtobool(os.getenv("OFFSET_ACK_ON_KAFKA", "False"))
+OFFSET_ACK_ON_KAFKA = strtobool(os.getenv("OFFSET_ACK_ON_KAFKA", "True"))
 
 DEBUG = strtobool(os.getenv("DEBUG", "False"))
 MAX_BUFFER_SIZE = int(os.getenv("MAX_BUFFER_SIZE", 50000))

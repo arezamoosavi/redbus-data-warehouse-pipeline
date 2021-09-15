@@ -59,7 +59,7 @@ class PgConnector:
 
     async def bulk_insert(self, table_name: str, cols: list, records: list):
         cols_str = ", ".join(cols)
-        sql = """INSERT INTO {} ({}) VALUES ({})""".format(
+        sql = """INSERT INTO {} ({}) VALUES ({}) on CONFLICT (id) DO NOTHING""".format(
             table_name, cols_str, ", ".join([f"${i+1}" for i in range(len(cols))]))
         conn = await asyncpg.connect(self.db_url)
         await conn.executemany(sql, records)
