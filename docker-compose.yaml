@@ -1,0 +1,62 @@
+version: "3.3"
+
+services:
+  pie_stream:
+    build: ./pie_stream
+    environment:
+      KAFKA_BROKER_URL: kafka:9092
+      TRANSACTIONS_TOPIC: queueing.transactions
+      DB_URL: postgresql://admin:admin@timescaledb:5432/transactions
+    volumes:
+      - ./pie_stream:/app
+
+  timescaledb:
+    image: timescale/timescaledb:2.0.0-pg12
+    restart: unless-stopped
+    command:
+      - "-cenable_partitionwise_aggregate=on"
+      - "-cjit=off"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./timescale/add-data-nodes.sh:/docker-entrypoint-initdb.d/add-data-nodes.sh
+    depends_on:
+      - "timescaledb-data1"
+      - "timescaledb-data2"
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: transactions
+      TIMESCALE_DATA_NODES: timescaledb-data1,timescaledb-data2
+
+  timescaledb-data1:
+    image: timescale/timescaledb:2.0.0-pg12
+    restart: unless-stopped
+    command:
+      - "-cmax_prepared_transactions=150"
+    volumes:
+      - db_data1:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  timescaledb-data2:
+    image: timescale/timescaledb:2.0.0-pg12
+    restart: unless-stopped
+    command:
+      - "-cmax_prepared_transactions=150"
+    volumes:
+      - db_data2:/var/lib/postgresql/data
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+volumes:
+  db_data:
+  db_data1:
+  db_data2:
