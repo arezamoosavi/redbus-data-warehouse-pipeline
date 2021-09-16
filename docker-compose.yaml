@@ -16,7 +16,8 @@ services:
     environment:
       KAFKA_BROKER_URL: kafka:9092
       TRANSACTIONS_TOPIC: queueing.transactions
-      DB_URL: postgresql://admin:admin@timescaledb:5432/transactions
+      DB_URL: postgresql://postgres:pass@timescaledb:5432/transactions
+      # DB_URL: cockroachdb://root@a3c075a9ace5:26257/transactions1?sslmode=disable
     volumes:
       - ./pie:/app
 
@@ -35,8 +36,8 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
       POSTGRES_DB: transactions
       TIMESCALE_DATA_NODES: timescaledb-data1,timescaledb-data2
 
@@ -48,8 +49,8 @@ services:
     volumes:
       - db_data1:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
       POSTGRES_DB: transactions
       POSTGRES_HOST_AUTH_METHOD: trust
 
@@ -61,10 +62,38 @@ services:
     volumes:
       - db_data2:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
       POSTGRES_DB: transactions
       POSTGRES_HOST_AUTH_METHOD: trust
+
+  roach1:
+    container_name: roach1
+    image: cockroachdb/cockroach:latest
+    command: start --insecure --accept-sql-without-tls --join=localhost
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - ./cockroach-data/roach1:/cockroach/cockroach-data
+
+  roach2:
+    container_name: roach2
+    image: cockroachdb/cockroach:latest
+    command: start --insecure --join=roach1
+    volumes:
+      - ./cockroach-data/roach2:/cockroach/cockroach-data
+    depends_on:
+      - roach1
+
+  roach3:
+    container_name: roach3
+    image: cockroachdb/cockroach:latest
+    command: start --insecure --join=roach1
+    volumes:
+      - ./cockroach-data/roach3:/cockroach/cockroach-data
+    depends_on:
+      - roach1
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0
@@ -108,7 +137,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
-
 volumes:
   db_data:
   db_data1:
