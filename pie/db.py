@@ -17,12 +17,12 @@ from sqlalchemy.sql import func
 
 metadata = MetaData()
 
-table_name = os.getenv("TABLE_NAME", "transactions")
+table_name = os.getenv("TABLE_NAME")
 transactions_table = Table(
     table_name,
     metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("created", DateTime(timezone=False), server_default=func.now()),
+    Column("created", DateTime(timezone=False),
+           server_default=func.now(), nullable=False),
     Column("source", Text),
     Column("target", Text),
     Column("amount", Numeric),
@@ -59,7 +59,7 @@ class PgConnector:
 
     async def bulk_insert(self, table_name: str, cols: list, records: list):
         cols_str = ", ".join(cols)
-        sql = """INSERT INTO {} ({}) VALUES ({}) on CONFLICT (id) DO NOTHING""".format(
+        sql = """INSERT INTO {} ({}) VALUES ({})""".format(
             table_name, cols_str, ", ".join([f"${i+1}" for i in range(len(cols))]))
         conn = await asyncpg.connect(self.db_url)
         await conn.executemany(sql, records)

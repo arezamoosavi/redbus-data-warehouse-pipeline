@@ -10,7 +10,7 @@ import conf
 from db import PgConnector
 
 pg = PgConnector()
-table_name = os.getenv("TABLE_NAME", "transactions")
+table_name = os.getenv("TABLE_NAME")
 
 logger = logging.getLogger(__name__)
 

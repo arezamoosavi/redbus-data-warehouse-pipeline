@@ -6,7 +6,7 @@ services:
     command: python producer.py
     environment:
       KAFKA_BROKER_URL: kafka:9092
-      TRANSACTIONS_TOPIC: queueing.transactions
+      TRANSACTIONS_TOPIC: queueing.stream_trx
       TRANSACTIONS_PER_SECOND: 2000
     volumes:
       - ./pie:/app
@@ -15,8 +15,9 @@ services:
     build: ./pie
     environment:
       KAFKA_BROKER_URL: kafka:9092
-      TRANSACTIONS_TOPIC: queueing.transactions
-      DB_URL: postgresql://postgres:pass@timescaledb:5432/transactions
+      TRANSACTIONS_TOPIC: queueing.stream_trx
+      TABLE_NAME: tr_data
+      DB_URL: postgresql://postgres:pass@timescaledb:5432/stream_trx
       # DB_URL: cockroachdb://root@a3c075a9ace5:26257/transactions1?sslmode=disable
     volumes:
       - ./pie:/app
@@ -38,7 +39,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pass
-      POSTGRES_DB: transactions
+      POSTGRES_DB: stream_trx
       TIMESCALE_DATA_NODES: timescaledb-data1,timescaledb-data2
 
   timescaledb-data1:
@@ -51,7 +52,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pass
-      POSTGRES_DB: transactions
+      POSTGRES_DB: stream_trx
       POSTGRES_HOST_AUTH_METHOD: trust
 
   timescaledb-data2:
@@ -64,7 +65,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pass
-      POSTGRES_DB: transactions
+      POSTGRES_DB: stream_trx
       POSTGRES_HOST_AUTH_METHOD: trust
 
   roach1:
